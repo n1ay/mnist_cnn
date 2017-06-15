@@ -9,6 +9,7 @@ from keras.datasets import mnist
 
 def main():
     num_classes = 10
+    epochs = 18
 
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     print(x_train.shape[0], 'train samples')
@@ -17,30 +18,33 @@ def main():
     x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
     x_test = x_test.reshape(x_test.shape[0], 28, 28, 1)
 
+    x_train = x_train.astype('float32')
+    x_test = x_test.astype('float32')
+
+    x_train /= 255
+    x_test /= 255
+
     y_train = keras.utils.to_categorical(y_train, num_classes)
     y_test = keras.utils.to_categorical(y_test, num_classes)
     print('x_train shape:', x_train.shape, '\ny_train shape:', y_train.shape)
 
     model = Sequential([
-        Conv2D(input_shape=(28, 28, 1), filters=32, kernel_size=3, strides=(1, 1), padding='valid',
+        Conv2D(input_shape=(28, 28, 1), filters=32, kernel_size=5, strides=(2, 1), padding='valid',
                data_format='channels_last', dilation_rate=(1, 1), activation='relu'),
-        MaxPooling2D(padding='valid', pool_size=(2, 2), data_format='channels_last'),
-        Dropout(0.25),
-        Conv2D(filters=64, kernel_size=3, strides=(1, 1), padding='valid', data_format='channels_last',
-               dilation_rate=(1, 1), activation='relu'),
-        MaxPooling2D(padding='valid', pool_size=(2, 2), data_format='channels_last'),
-        Conv2D(filters=128, kernel_size=3, strides=(1, 1), padding='valid', data_format='channels_last',
+        #MaxPooling2D(padding='valid', pool_size=(2, 2), data_format='channels_last'),
+        Conv2D(filters=64, kernel_size=5, strides=(1, 2), padding='valid', data_format='channels_last',
                dilation_rate=(1, 1), activation='relu'),
         MaxPooling2D(padding='valid', pool_size=(2, 2), data_format='channels_last'),
         Dropout(0.25),
         Flatten(),
-        Dense(units=num_classes, activation='tanh'),
+        Dense(units=128, activation='relu'),
+        Dropout(0.25),
         Dense(units=num_classes, activation='softmax')
     ])
 
     optimizer = keras.optimizers.Adadelta()
     model.compile(optimizer=optimizer, loss=losses.categorical_crossentropy, metrics=['accuracy'])
-    model.fit(x_train, y_train, batch_size=20, epochs=20, validation_data=[x_test, y_test])
+    model.fit(x_train, y_train, batch_size=100, epochs=epochs, validation_data=[x_test, y_test])
 
     predictions = model.predict(x_test)
     print(predictions.shape)
