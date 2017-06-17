@@ -1,5 +1,5 @@
 ## What is this ##
-It is a mnist dataset model built with Keras   
+It is a mnist dataset classification model built with Keras   
 Check Keras: http://keras.io/
 
 ## Performance ##
